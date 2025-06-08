@@ -58,7 +58,7 @@ def search(query: str, top_k=5):
 if __name__ == "__main__":
     while True:
         try:
-            query = input("\n🧠 Ask the Eldrich Oracle (or 'exit'): ").strip()
+            query = input("\n🐙 Ask the Eldrich Oracle (or 'exit'): ").strip()
             if query.lower() in ("exit", "quit"):
                 break
             search(query)

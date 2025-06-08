@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-server
+  template:
+    metadata:
+      labels:
+        app: llm-server
+    spec:
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+          ports:
+            - containerPort: 8000
+          command: ["python3"]
+          args:
+            - -m
+            - vllm.entrypoints.openai.api_server
+            - --model
+            - /models/llama-3-8b-instruct.Q4_K_M.gguf
+            - --dtype
+            - auto
+          volumeMounts:
+            - name: model-volume
+              mountPath: /models
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /Users/jennifersawyer/dev/models/llama-3  # or wherever the GGUF lives
+            type: Directory
