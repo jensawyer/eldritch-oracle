@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: llm-model-pv
+spec:
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: hostpath
+  hostPath:
+    path: ${LLM_MODEL_DIR}
+  persistentVolumeReclaimPolicy: Retain

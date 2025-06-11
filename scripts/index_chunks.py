@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 from elasticsearch import Elasticsearch, helpers
 import ssl
 
-# Load .env variables
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
 # Create a secure context that ignores certificate verification (for local dev)
 context = ssl.create_default_context()
 context.check_hostname = False

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: vllm
-          image: vllm/vllm-openai:latest
+          image: vllm/vllm-openai:v0.4.0
           ports:
             - containerPort: 8000
           command: ["python3"]
@@ -22,14 +22,14 @@ spec:
             - -m
             - vllm.entrypoints.openai.api_server
             - --model
-            - /models/llama-3-8b-instruct.Q4_K_M.gguf
-            - --dtype
-            - auto
+            - /models/${LLM_MODEL_FILE}
+            - --device
+            - cpu
+            - --disable-async-io
           volumeMounts:
             - name: model-volume
               mountPath: /models
       volumes:
         - name: model-volume
-          hostPath:
-            path: /Users/jennifersawyer/dev/models/llama-3  # or wherever the GGUF lives
-            type: Directory
+          persistentVolumeClaim:
+            claimName: llm-model-pvc

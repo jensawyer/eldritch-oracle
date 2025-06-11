@@ -9,7 +9,8 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 import re
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
+
 # Config
 INPUT_FILE_DIR = os.getenv("CORPUS_RAW_FILE_DIR")
 OUTPUT_FILE = os.getenv("CORPUS_JSONL_FILE")
