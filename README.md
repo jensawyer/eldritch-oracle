@@ -1,7 +1,17 @@
+### What is this thing?
+
+### Setup
+
+To run this project locally, you will need to have a Kubernetes cluster running on your machine.
+
+I am using the Corpus of Cthulhu dataset which I put together in grad school. :) You can get it here:
+
+
 ###  Why I'm Using Ollama for Local Inference
+It's because I'm doing local inference on a Mac.
 
 This project uses [Ollama](https://ollama.com) to serve LLaMA models locally on macOS. We do this because Apple Silicon 
-does not expose GPU compute to Docker containers or Linux VMs, and vLLM or similar libraries require GPU access.
+does not expose GPU compute to Docker containers or Linux VMs, and vLLM or similar libraries require GPU access. 
 
 ### Other services expect you to have a local K8s cluster
 

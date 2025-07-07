@@ -1,4 +1,3 @@
-from typing import List, Dict
 from models.chat import ChatMessage
 from core.config import Config
 import logging
@@ -16,7 +15,17 @@ class ESSearch:
     def embed_query(self, query:str) -> list[int]:
         return self.encoder.encode(query, normalize_embeddings=True).tolist()
 
-    def search(self, messages: list[ChatMessage], top_k=5) -> list[dict]:
+    def search(self, messages: list[ChatMessage], top_k=5) -> list[str]:
+        """
+        This version of search is just doing simple vector similarity. It's not great for negation or any
+        sort of deeper linguistic preprocessing that could enhance results, but it is a simple for a personal project
+        and sufficient for now.
+        :param messages: The list of messages coming in for lookup. Better not be very many if the LLM context window is small!
+        :param top_k: The number of best results to return. Keep this value small for a small window! The number of results
+        before things break is related to the sum of the size of the context window, length of the rest of the system prompt, length of the
+        chunks of text as you preprocessed with the prep_docs script, and whether you are feeding context back in for future turns (we aren't for now)
+        :return: The list of document strings
+        """
         latest_user_msg = next((m.content for m in reversed(messages) if m.role == "user"), "")
         if not latest_user_msg:
             return []
@@ -33,17 +42,9 @@ class ESSearch:
                 }
             }
         }
-        result = self.es_client.search(index=self.index, body=body)
+        search_result = self.es_client.search(index=self.index, body=body)
+        result = []
+        for hit in search_result['hits']['hits']:
+            del hit['_source']['embedding']
+            result.append(str(hit['_source']))
         return result
-
-
-# def retrieve_relevant_chunks(messages: List[ChatMessage]) -> List[Dict]:
-#     """
-#     Stub for retrieving relevant chunks from ElasticSearch using the latest user query.
-#     """
-#     latest_user_msg = next((m.content for m in reversed(messages) if m.role == "user"), "")
-#     if not latest_user_msg:
-#         return []
-#
-#     # TODO: Hook into real ElasticSearch client and return top-k matches
-#     return [{"content": "Necronomicon is a fictional grimoire..."}]

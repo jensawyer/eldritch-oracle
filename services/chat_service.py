@@ -10,16 +10,27 @@ class RAGAgent:
         self.config = config
 
     def generate_response(self, request:ChatRequest) -> ChatMessage:
-        context_chunks = self.search_service.search(request.messages, top_k=2)
-        context = []
-        for hit in context_chunks['hits']['hits']:
-            del hit['_source']['embedding']
-            context.append(str(hit['_source']))
-        context_text = "\n\n".join(c for c in context)
-        print(context_text)
-        sys_prompt = f"""You are an expert on H.P. Lovecraft's work that likes to speak in his writing style.
-You will answer questions with excerpts from H.P. Lovecraft's stories which you may explain or summarize. Relevant context you must use for for your reply: 
-{context_text}"""
+        """
+        This is a super basic RAG flow so we are doing no fancy things or introducing any elaborate libraries. This is to
+        demonstrate what barebones RAG actually looks like. With a big context window, you can actually do a lot before
+        getting into adding extra complexity.
+
+        The flow is as follows:
+        1. Use the user message to query for the docs in ElasticSearch that are most similar
+        2. Use the search results as part of the system prompt which is sent along with the user's message to the LLM
+        which will then factor the whole thing into the generated response.
+
+        :param request:
+        :return: The response message from the assistant.
+        """
+        # First we use the user query to get the relevant chunks from our ES service. These are joined and used to contribute to
+        # the system prompt
+        context_chunks: list[str] = self.search_service.search(request.messages, top_k=2)
+        context_text = "\n\n".join(c for c in context_chunks)
+        # print(context_text)
+        sys_prompt = f"""You are an assistant that is an expert on H.P. Lovecraft's work.
+You will answer questions with excerpts from H.P. Lovecraft's stories which you may explain or summarize in the style of Lovecraft.
+Use the following context to help write your reply: {context_text}"""
         final_prompt = []
         final_prompt.append({"role": "system", "content": sys_prompt})
         final_prompt.append(*[msg.dict() for msg in request.messages])
@@ -27,30 +38,6 @@ You will answer questions with excerpts from H.P. Lovecraft's stories which you 
                                                               messages=final_prompt,
                                                               max_tokens=1024,
                                                               temperature=0.4)
-        print(response)
+        # print(response)
         return ChatMessage(role="assistant", content=response.choices[0].message.content)
 
-
-
-
-# def generate_response(request: ChatRequest) -> ChatMessage:
-#     """
-#     Core RAG logic:
-#     1. Retrieve relevant context from ES
-#     2. Compose a system + user prompt
-#     3. Call the LLM API and return response
-#     """
-#     # Step 1: Retrieve context (stub for now)
-#     context_chunks = retrieve_relevant_chunks(request.messages)
-#
-#     # Step 2: Compose final prompt
-#     context_text = "\n\n".join(chunk["content"] for chunk in context_chunks)
-#     final_prompt = [
-#         {"role": "system", "content": f"You are an expert on H.P. Lovecraft's work.\n\nRelevant context:\n{context_text}"},
-#         *[msg.dict() for msg in request.messages]
-#     ]
-#
-#     # Step 3: Call LLM (stub for now)
-#     response_text = "This is a stubbed response."
-
-    # return ChatMessage(role="assistant", content=response_text)

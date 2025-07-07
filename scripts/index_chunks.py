@@ -12,10 +12,10 @@ context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
 JSONL_PATH = os.getenv("CORPUS_JSONL_FILE")
-ES_HOST = os.getenv("ES_HOST", "https://localhost:30920")
-ES_INDEX = os.getenv("ES_INDEX", "lovecraft_chunks")
-ES_USER = os.getenv("ES_USER", "elastic")
-ES_PASS = os.getenv("ES_PASSWORD", "changeme")
+ES_HOST = os.getenv("ES_HOST")
+ES_INDEX = os.getenv("ES_INDEX")
+ES_USER = os.getenv("ES_USER")
+ES_PASS = os.getenv("ES_PASSWORD")
 
 if not JSONL_PATH or not Path(JSONL_PATH).exists():
     raise FileNotFoundError(f"CORPUS_JSONL_FILE not found: {JSONL_PATH}")

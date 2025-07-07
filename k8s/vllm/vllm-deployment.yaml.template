@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: llm-server
+  name: vllm-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: llm-server
+      app: vllm-server
   template:
     metadata:
       labels:
-        app: llm-server
+        app: vllm-server
     spec:
       containers:
         - name: vllm
@@ -32,4 +32,4 @@ spec:
       volumes:
         - name: model-volume
           persistentVolumeClaim:
-            claimName: llm-model-pvc
+            claimName: vllm-model-pvc

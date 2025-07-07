@@ -53,11 +53,13 @@ def search(query: str, top_k=5):
         score = hit["_score"]
         source = hit["_source"]
         print(f"\n#{i+1} — Score: {score:.3f}")
-        print(f"[{source['story_title']}] — {source['text'][:400]}")
+        print(f"[{source['story_title']}] — {source['text']}")
 
 if __name__ == "__main__":
+    print("Ask the DB for chunks directly to see the raw outputs most close to your query.")
     while True:
         try:
+
             query = input("\n🐙 Ask the Eldrich Oracle (or 'exit'): ").strip()
             if query.lower() in ("exit", "quit"):
                 break

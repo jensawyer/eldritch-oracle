@@ -11,9 +11,9 @@ endif
 
 SELF_HOST_LLM ?= true
 
-.PHONY: all check-env dev-up dev-down process index download-model prepare-k8s
+.PHONY: all check-env dev-up dev-down process-raw-corpus index download-vllm-model prepare-k8s check-es check-llm wait-for-ready
 
-all: download-model process dev-up index
+all: download-vllm-model process-raw-corpus dev-up index
 
 check-env:
 	@echo "Validating environment configuration..."
@@ -50,45 +50,70 @@ check-env:
 		echo "   → Model: $(INFERENCE_MODEL_NAME)"; \
 	fi
 
-download-model:
-	cd scripts && python3 download_model.py
-
-process:
-	cd scripts && python3 prep_docs.py
-
-index:
-	cd scripts && python3 index_chunks.py
-
-prepare-k8s:
+prepare-vllm-k8s:
 	@echo "Preparing K8s manifests..."
 ifeq ($(SELF_HOST_LLM),true)
 	@envsubst < k8s/llm/llm-deployment.yaml.template > k8s/llm/llm-deployment.yaml
 	@envsubst < k8s/llm/llm-pv.yaml.template > k8s/llm/llm-pv.yaml
 endif
 
-dev-up: check-env prepare-k8s
+wait-for-ready:
+	@if [ -z "$(LABEL)" ]; then \
+		echo "ERROR: You must pass LABEL (e.g. make wait-for-ready LABEL=app=elasticsearch)"; \
+		exit 1; \
+	fi
+	@echo "⏳ Waiting for pod with label '$(LABEL)' to become Ready..."
+	@timeout 90 bash -c 'until kubectl get pods -l $(LABEL) -o jsonpath="{.items[0].status.conditions[?(@.type==\"Ready\")].status}" 2>/dev/null | grep -q True; do sleep 2; done' || \
+	(echo "ERROR: Pod with label '$(LABEL)' did not become Ready in time." && exit 1)
+	@echo "Pod with label '$(LABEL)' is Ready."
+
+wait-for-es:
+	@$(MAKE) wait-for-ready LABEL=app=elasticsearch
+
+wait-for-llm:
+	@$(MAKE) wait-for-ready LABEL=app=llm-server
+
+check-es:
+	@echo "🔍 Checking Elasticsearch connection and index at $(ES_HOST)..."
+	cd scripts && python3 test_es_connection.py
+
+check-llm:
+	@echo "🔍 Checking LLM inference backend availability..."
+	cd scripts && python3 test_llm_connection.py
+
+download-vllm-model:
+	cd scripts && python3 download_model.py
+
+process-raw-corpus:
+	@echo "Preparing document chunks from raw corpus so we have something to index..."
+	cd scripts && python3 -m spacy download $(SPACY_MODEL) && python3 prep_docs.py
+
+index:
+	@echo "Indexing document chunks into ElasticSearch..."
+	cd scripts && python3 index_chunks.py
+
+dev-up:
+	@$(MAKE) check-env
+
+	@if [ "$(SELF_HOST_LLM)" = "true" ]; then \
+	  @$(MAKE) prepare-vllm-k8s \
+	fi
+
 	@for comp in $(K8S_COMPONENTS); do \
 	  echo "Applying $$comp..."; \
 	  kubectl apply -f $$comp; \
 	done
 
-	@echo "Checking LLM inference backend availability..."
+	@$(MAKE) wait-for-es
+	@$(MAKE) check-es
+
 	@if [ "$(SELF_HOST_LLM)" = "true" ]; then \
-		echo "Waiting for LLM server pod to appear..."; \
-		timeout 60 bash -c 'until kubectl get pods -l app=llm-server | grep Running; do sleep 2; done' || \
-		  (echo "ERROR: LLM pod never appeared" && exit 1); \
-		echo "Verifying LLM server is responding..."; \
-		sleep 2; \
-		curl --fail --silent $(INFERENCE_API_URL)/v1/models > /dev/null && \
-		  echo "LLM server is up at $(INFERENCE_API_URL)" || \
-		  (echo "ERROR: LLM server did not respond as expected" && exit 1); \
-	else \
-		echo "Using Ollama or external inference backend"; \
-		echo "Checking inference URL: $(INFERENCE_API_URL)/v1/models" \
-		curl --fail --silent $(INFERENCE_API_URL)/v1/models > /dev/null && \
-		  echo "Able to reach LLM inference server at $(INFERENCE_API_URL)" || \
-		  (echo "ERROR: Could not reach LLM inference server at $(INFERENCE_API_URL). Is it running?" && exit 1); \
+	  $(MAKE) wait-for-llm; \
 	fi
+
+	@$(MAKE) check-llm
+
+
 
 dev-down:
 	@for comp in $(K8S_COMPONENTS); do \

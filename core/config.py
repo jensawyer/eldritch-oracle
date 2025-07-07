@@ -1,8 +1,6 @@
 # core/config.py
 import os
-import json
 import logging
-import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
