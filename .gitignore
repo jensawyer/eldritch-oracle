@@ -2,6 +2,8 @@
 llm-deployment.yaml
 llm-pv.yaml
 
+.env
+
 # Python-generated files
 __pycache__/
 *.py[oc]
