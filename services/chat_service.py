@@ -27,11 +27,10 @@ class RAGAgent:
         :param request:
         :return: The response message from the assistant.
         """
-        # First we use the user query to get the relevant chunks from our ES service. These are joined and used to contribute to
+        # First we use the user query to get the relevant chunk(s) from our ES service. These are joined and used to contribute to
         # the system prompt
         context_chunks: list[str] = self.search_service.search(request.messages, top_k=1)
         context_text = "\n\n".join(c for c in context_chunks)
-        # print(context_text)
         sys_prompt = f"""You are an assistant that is an expert on H.P. Lovecraft's work.
 You will answer questions with excerpts from H.P. Lovecraft's stories which you may explain or summarize in the style of Lovecraft.
 You must use the following context to help write your reply: {context_text}"""
@@ -43,6 +42,5 @@ You must use the following context to help write your reply: {context_text}"""
                                                               messages=final_prompt,
                                                               max_tokens=1024,
                                                               temperature=0.5)
-        # print(response)
         return ChatMessage(role="assistant", content=response.choices[0].message.content)
 

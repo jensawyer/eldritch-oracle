@@ -6,7 +6,7 @@ K8S_DIR := $(MAKEFILE_DIR)k8s
 ifeq ($(SELF_HOST_LLM),true)
   K8S_COMPONENTS := $(shell find $(K8S_DIR) -name '*.yaml')
 else
-  K8S_COMPONENTS := $(shell find $(K8S_DIR) -not -path "$(K8S_DIR)/llm/*" -name '*.yaml')
+  K8S_COMPONENTS := $(shell find $(K8S_DIR) -not -path "$(K8S_DIR)/vllm/*" -name '*.yaml')
 endif
 
 SELF_HOST_LLM ?= true

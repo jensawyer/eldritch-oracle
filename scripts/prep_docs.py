@@ -7,6 +7,9 @@ from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 from dotenv import load_dotenv
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
 
@@ -100,7 +103,7 @@ def main():
                 for chunk in story_chunks:
                     out_f.write(json.dumps(chunk) + "\n")
 
-    print(f"Finished writing chunks to {OUTPUT_FILE}")
+    logger.info(f"Finished writing chunks to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()

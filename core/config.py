@@ -22,6 +22,7 @@ class Config:
         self.es_user = os.getenv("ES_USER")
         self.es_password = os.getenv("ES_PASSWORD")
         self.es_index = os.getenv("ES_INDEX")
+        self.top_k_search_results = os.getenv("TOP_K_ES_RESULTS")
 
         self.embedding_model = os.getenv("EMBEDDING_MODEL")
 

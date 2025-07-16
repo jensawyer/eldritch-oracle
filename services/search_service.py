@@ -9,6 +9,7 @@ class ESSearch:
         self.es_client = config.es_client
         self.index: str = config.es_index
         self.embedding_model: str = config.embedding_model
+        self.top_k_results: str = config.top_k_search_results
         self.logger = logging.getLogger(self.__class__.__name__)
         self._encoder =  None
 
@@ -22,7 +23,7 @@ class ESSearch:
     def embed_query(self, query:str) -> list[int]:
         return self.encoder.encode(query, normalize_embeddings=True).tolist()
 
-    def search(self, messages: list[ChatMessage], top_k=5) -> list[str]:
+    def search(self, messages: list[ChatMessage], top_k) -> list[str]:
         """
         This version of search is just doing simple vector similarity. It's not great for negation or any
         sort of deeper linguistic preprocessing that could enhance results, but it is a simple for a personal project
@@ -38,7 +39,7 @@ class ESSearch:
             return []
         embedding = self.embed_query(latest_user_msg)
         body = {
-            "size": top_k,
+            "size": self.top_k_results,
             "query": {
                 "script_score": {
                     "query": {"match_all": {}},

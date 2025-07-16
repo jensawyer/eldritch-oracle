@@ -5,6 +5,12 @@ from elasticsearch import Elasticsearch
 from sentence_transformers import SentenceTransformer
 import urllib3
 import ssl
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
+
+# We're filtering this warning because we're running ElasticSearch in an insecure local dev mode. Without this
+# we end up getting a swarm of warnings that aren't helping in this case.
+warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 # Disable TLS warning spam
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -16,10 +22,10 @@ context = ssl.create_default_context()
 context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
-ES_HOST = os.getenv("ES_HOST", "https://localhost:30920")
-ES_INDEX = os.getenv("ES_INDEX", "lovecraft_chunks")
-ES_USER = os.getenv("ES_USER", "elastic")
-ES_PASS = os.getenv("ES_PASSWORD", "changeme")
+ES_HOST = os.getenv("ES_HOST")
+ES_INDEX = os.getenv("ES_INDEX")
+ES_USER = os.getenv("ES_USER")
+ES_PASS = os.getenv("ES_PASSWORD")
 MODEL_NAME = "BAAI/bge-base-en-v1.5"
 
 
@@ -67,7 +73,7 @@ if __name__ == "__main__":
     while True:
         try:
 
-            query = input("\n🐙 Ask the Eldrich Oracle (or 'exit'): ").strip()
+            query = input("\nAsk the Eldrich Oracle (or 'exit'): ").strip()
             if query.lower() in ("exit", "quit"):
                 break
             search(query)

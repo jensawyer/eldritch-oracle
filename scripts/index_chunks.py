@@ -4,6 +4,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch, helpers
 import ssl
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
+
+# We're filtering this warning because we're running ElasticSearch in an insecure local dev mode. Without this
+# we end up getting a swarm of warnings that aren't helping in this case.
+warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
 # Create a secure context that ignores certificate verification (for local dev)
