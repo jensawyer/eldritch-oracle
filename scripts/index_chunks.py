@@ -29,7 +29,7 @@ es = Elasticsearch(ES_HOST,
 # Create index if not exists
 def create_index():
     if es.indices.exists(index=ES_INDEX):
-        print(f"ℹ️ Index '{ES_INDEX}' already exists.")
+        print(f"Index '{ES_INDEX}' already exists.")
         return
 
     print(f"Creating index '{ES_INDEX}'...")

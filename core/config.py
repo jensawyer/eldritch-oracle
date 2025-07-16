@@ -33,7 +33,8 @@ class Config:
     @property
     def es_client(self):
         """
-        Initialize the ElasticSearch client.
+        Initialize the ElasticSearch client. We're ditching security in this simple project, but you should never
+        run like this in the real world.
         :return:
         """
         if self._es_client is None:
@@ -51,6 +52,12 @@ class Config:
 
     @property
     def openai_client(self):
+        """
+        This produces a client that works with any OpenAI compatible API (such as Ollama). You can swap to ChatGPT
+        if you have an account and enjoy the giant context window. This would let you return more results from ES
+        without sacrificing the rest of the system prompt, for example.
+        :return:
+        """
         if self._openai_client is None:
             base_url = self.inference_api_url.rstrip("/") + "/v1"
             self._openai_client = OpenAI(

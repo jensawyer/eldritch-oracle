@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from sentence_transformers import SentenceTransformer
 import urllib3
+import ssl
 
 # Disable TLS warning spam
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -11,17 +12,23 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Load env
 load_dotenv()
 
+context = ssl.create_default_context()
+context.check_hostname = False
+context.verify_mode = ssl.CERT_NONE
+
 ES_HOST = os.getenv("ES_HOST", "https://localhost:30920")
 ES_INDEX = os.getenv("ES_INDEX", "lovecraft_chunks")
 ES_USER = os.getenv("ES_USER", "elastic")
 ES_PASS = os.getenv("ES_PASSWORD", "changeme")
 MODEL_NAME = "BAAI/bge-base-en-v1.5"
 
+
 # Connect to Elasticsearch
 es = Elasticsearch(
     ES_HOST,
     basic_auth=(ES_USER, ES_PASS),
-    verify_certs=False
+    verify_certs=False,
+    ssl_context=context
 )
 
 # Load encoder

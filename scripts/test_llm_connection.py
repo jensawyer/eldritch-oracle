@@ -1,3 +1,11 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#   "dotenv>=0.9.9",
+#   "openai>=1.86.0",
+# ]
+# ///
+
 import os
 import sys
 from openai import OpenAI
@@ -12,7 +20,8 @@ INFERENCE_API_KEY = os.getenv("INFERENCE_API_KEY")
 INFERENCE_MODEL_NAME = os.getenv("INFERENCE_MODEL_NAME")
 BASE_URL = INFERENCE_API_URL.rstrip("/") + "/v1"
 
-
+print(f"Python exec: {sys.executable}")
+print(f"Version: {sys.version}")
 
 try:
     openai_client = OpenAI(

@@ -1,16 +1,24 @@
 from models.chat import ChatMessage
 from core.config import Config
 import logging
-from sentence_transformers import SentenceTransformer
+
 
 class ESSearch:
 
     def __init__(self, config:Config):
         self.es_client = config.es_client
-        self.index = config.es_index
+        self.index: str = config.es_index
+        self.embedding_model: str = config.embedding_model
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.addHandler(config.loghandler_config)
-        self.encoder = SentenceTransformer(config.embedding_model)
+        self._encoder =  None
+
+    @property
+    def encoder(self):
+        if self._encoder is None:
+            from sentence_transformers import SentenceTransformer
+            self._encoder = SentenceTransformer(self.embedding_model)
+        return self._encoder
 
     def embed_query(self, query:str) -> list[int]:
         return self.encoder.encode(query, normalize_embeddings=True).tolist()
@@ -47,4 +55,5 @@ class ESSearch:
         for hit in search_result['hits']['hits']:
             del hit['_source']['embedding']
             result.append(str(hit['_source']))
+        print(result)
         return result

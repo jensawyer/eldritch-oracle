@@ -2,6 +2,7 @@ from models.chat import ChatMessage, ChatRequest
 from services.search_service import ESSearch
 from core.config import Config
 
+
 class RAGAgent:
 
     def __init__(self, config:Config, search_service:ESSearch):
