@@ -5,6 +5,7 @@ import os
 # "The current process just got forked, after parallelism has already been used..."
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +14,7 @@ from core.config import Config
 from services.chat_service import RAGAgent
 from services.search_service import ESSearch
 
+logger = logging.getLogger(__name__)
 
 class AppState:
     agent: RAGAgent
@@ -21,15 +23,12 @@ class AppState:
 async def lifespan(app: FastAPI):
     config = Config()
     search = ESSearch(config)
-    print("Preloading SentenceTransformer (post-fork)...")
-    from sentence_transformers import SentenceTransformer
-    _ = SentenceTransformer(config.embedding_model)
-    print("Initializing Agent...")
+    logger.info("Initializing RAGAgent")
     agent = RAGAgent(config, search)
     app.state = AppState
     app.state.agent = agent
     yield
-    print("Shutting down RAGAgent...")
+    logger.info("Shutting down RAGAgent...")
 
 
 app = FastAPI(lifespan=lifespan)

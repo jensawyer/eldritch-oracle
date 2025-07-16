@@ -1,3 +1,5 @@
+import logging
+
 from models.chat import ChatMessage, ChatRequest
 from services.search_service import ESSearch
 from core.config import Config
@@ -9,6 +11,7 @@ class RAGAgent:
         self.openai_client = config.openai_client
         self.search_service = search_service
         self.config = config
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def generate_response(self, request:ChatRequest) -> ChatMessage:
         """
@@ -26,19 +29,20 @@ class RAGAgent:
         """
         # First we use the user query to get the relevant chunks from our ES service. These are joined and used to contribute to
         # the system prompt
-        context_chunks: list[str] = self.search_service.search(request.messages, top_k=2)
+        context_chunks: list[str] = self.search_service.search(request.messages, top_k=1)
         context_text = "\n\n".join(c for c in context_chunks)
         # print(context_text)
         sys_prompt = f"""You are an assistant that is an expert on H.P. Lovecraft's work.
 You will answer questions with excerpts from H.P. Lovecraft's stories which you may explain or summarize in the style of Lovecraft.
-Use the following context to help write your reply: {context_text}"""
+You must use the following context to help write your reply: {context_text}"""
         final_prompt = []
         final_prompt.append({"role": "system", "content": sys_prompt})
-        final_prompt.append(*[msg.dict() for msg in request.messages])
+        final_prompt.append(*[msg.model_dump() for msg in request.messages])
+        self.logger.debug(final_prompt)
         response = self.openai_client.chat.completions.create(model=self.config.inference_model_name,
                                                               messages=final_prompt,
                                                               max_tokens=1024,
-                                                              temperature=0.4)
+                                                              temperature=0.5)
         # print(response)
         return ChatMessage(role="assistant", content=response.choices[0].message.content)
 

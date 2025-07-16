@@ -28,6 +28,7 @@ class Config:
         # Initialize clients
         self._es_client = None
         self._openai_client = None
+        self._setup_logging()
 
 
     @property
@@ -66,11 +67,15 @@ class Config:
             )
         return self._openai_client
 
-    @property
-    def loghandler_config(self):
-        logHandler = logging.StreamHandler()
-        formatter = JsonFormatter()
-        logHandler.setFormatter(formatter)
-        return logHandler
+
+    def _setup_logging(self):
+        logger = logging.getLogger()
+        if not logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = JsonFormatter("{message}{asctime}{exc_info}", style="{")
+            handler.setFormatter(formatter)
+            logger.setLevel(logging.DEBUG)
+            logger.addHandler(handler)
+
 
 

@@ -10,7 +10,6 @@ class ESSearch:
         self.index: str = config.es_index
         self.embedding_model: str = config.embedding_model
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.addHandler(config.loghandler_config)
         self._encoder =  None
 
     @property
@@ -55,5 +54,5 @@ class ESSearch:
         for hit in search_result['hits']['hits']:
             del hit['_source']['embedding']
             result.append(str(hit['_source']))
-        print(result)
+        self.logger.debug(result)
         return result
