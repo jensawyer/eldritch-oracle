@@ -35,9 +35,10 @@ This project also expects you to have [The Corpus of Cthulhu](https://github.com
 > ☣️ **WARNING**: Make sure to point `kubectl` at your local K8s cluster BEFORE you run `make all`!
 1. Clone BOTH this repo and [The Corpus of Cthulhu](https://github.com/jensawyer/corpus_of_cthulhu) repo
 2. Set up a .env file (see .env.template)
-3. Run `make all` from the root directory to bring everything up and prepare your data. This will deploy the needed services to your k8s cluster, preprocess the corpus to create a jsonl file, and index the data so you have something to talk about.
+3. Run `make all` from the root directory to bring everything up and prepare your data. This will deploy the needed services to your k8s cluster, preprocess the corpus to create a jsonl file, and index the data so you have something to talk about. 
 4. Launch the server with `make serve`
 5. Query the oracle via /api/chat
+6. Run `make dev-down` when you tire of playing with the Eldrich Oracle. (There is also a `make dev-up` target you can use once you've run all and have processed the data, etc.)
 
 
 ### A Test API Call
