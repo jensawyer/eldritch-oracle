@@ -21,7 +21,7 @@ Designed as a portfolio-quality project that would be pretty trivial to extend, 
 * RAGAgent orchestration of search + LLM completion
 * Docker and K8s support (vLLM-optional)
 * Configurable via .env and runtime CLI
-* REST API served by FastAPI with CORS support
+* REST API served by FastAPI
 
 ## System Requirements
 
