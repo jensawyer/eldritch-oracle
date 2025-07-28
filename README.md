@@ -32,7 +32,7 @@ I'm running this on an M3 Macbook with 64GB of memory. This lets me run a decent
 This project also expects you to have [The Corpus of Cthulhu](https://github.com/jensawyer/corpus_of_cthulhu) dataset. This is a fun little project I put together in grad school where I was focused on natural language generation.
 
 ## Getting Started
-
+> ☣️ **WARNING**: Make sure to point `kubectl` at your local K8s cluster BEFORE you run `make all`!
 1. Clone BOTH this repo and [The Corpus of Cthulhu](https://github.com/jensawyer/corpus_of_cthulhu) repo
 2. Set up a .env file (see .env.template)
 3. Run `make all` from the root directory to bring everything up and prepare your data. This will deploy the needed services to your k8s cluster, preprocess the corpus to create a jsonl file, and index the data so you have something to talk about.
@@ -66,7 +66,7 @@ In an easier-to-read format:
 >Yet, even in their domesticated state, the Shoggoth's malevolent presence lurked, waiting to unleash its full fury upon an unsuspecting world. As I studied the emotions conveyed in the carvings, I prayed that none ever might behold such abominations again...
 
 
-### Production
+## Production
 
 If you want to deploy in production or on a GPU-enabled Linux server, you should swap in `vllm`, `triton-inference-server`, 
 or similar in the `llm-server` deployment. Alternatively, if you don't care about your data privacy, use a 3rd party API.
