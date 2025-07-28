@@ -29,7 +29,7 @@ To run this project locally, you will need to have a Kubernetes cluster running 
 
 I'm running this on an M3 Macbook with 64GB of memory. This lets me run a decent sized model, but does not currently support vLLM in Docker on a Linux VM. If you're on a Linux box with a good GPU or two, there is the option of running the vLLM configuration to set up inference in your Kubernetes cluster. You should also be able to use your ChatGPT API info if you want to have a glorious context window with loads of room for returning more docs from ElasticSearch. Otherwise, I am just using [Ollama](https://ollama.com) because Apple Silicon currently does not expose GPU compute to Docker containers or Linux VMs and it was just super annoying. Personal projects should be fun too, right? 
 
-This project also expects you to have the Corpus of Cthulhu dataset. This is a fun little project I put together in grad school where I was focused on natural language generation.
+This project also expects you to have [The Corpus of Cthulhu](https://github.com/jensawyer/corpus_of_cthulhu) dataset. This is a fun little project I put together in grad school where I was focused on natural language generation.
 
 ## Getting Started
 
@@ -40,7 +40,7 @@ This project also expects you to have the Corpus of Cthulhu dataset. This is a f
 5. Query the oracle via /api/chat
 
 
-### A Test API Calls
+### A Test API Call
 ```aiignore
 curl -X POST http://localhost:8000/api/chat \
   -H "Content-Type: application/json" \
