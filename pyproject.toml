@@ -1,7 +1,8 @@
 [project]
 name = "eldritch-oracle"
 version = "0.1.0"
-description = "Add your description here"
+author = "Jennifer Sawyer"
+description = "A sample barebones RAG agent."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
