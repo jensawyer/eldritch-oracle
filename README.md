@@ -36,6 +36,8 @@ This project also expects you to have [The Corpus of Cthulhu](https://github.com
 
 ## Getting Started
 > ☣️ **WARNING**: Make sure to point `kubectl` at your local K8s cluster BEFORE you run `make all`!
+
+> 🪳 Note: If you run `make all` and get an error about pip not being installed, this is because uv does not install pip in the venv by default. Run `uv pip install pip` to fix. It seems SpaCy needs pip to download the model we use in preprocessing the data.
 1. Clone BOTH this repo and [The Corpus of Cthulhu](https://github.com/jensawyer/corpus_of_cthulhu) repo
 2. Set up a .env file (see .env.template)
 3. Run `make all` from the root directory to bring everything up and prepare your data. This will deploy the needed services to your k8s cluster, preprocess the corpus to create a jsonl file, and index the data so you have something to talk about. 
