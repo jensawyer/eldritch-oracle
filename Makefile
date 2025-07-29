@@ -85,7 +85,7 @@ check-es:
 check-llm:
 	@echo "Testing raw curl to $(INFERENCE_API_URL)/v1/models..."
 	@curl --fail --silent "$(INFERENCE_API_URL)/v1/models" || \
-		(echo "ERROR: Could not connect to Ollama inference server" && exit 1)
+		(echo "ERROR: Could not connect to Ollama inference server or maybe you need to install the model $(INFERENCE_MODEL_NAME)" && exit 1)
 
 
 download-vllm-model:
