@@ -1,5 +1,4 @@
 import os
-import json
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from sentence_transformers import SentenceTransformer
@@ -31,17 +30,16 @@ MODEL_NAME = "BAAI/bge-base-en-v1.5"
 
 # Connect to Elasticsearch
 es = Elasticsearch(
-    ES_HOST,
-    basic_auth=(ES_USER, ES_PASS),
-    verify_certs=False,
-    ssl_context=context
+    ES_HOST, basic_auth=(ES_USER, ES_PASS), verify_certs=False, ssl_context=context
 )
 
 # Load encoder
 encoder = SentenceTransformer(MODEL_NAME)
 
+
 def embed_query(query: str):
     return encoder.encode(query, normalize_embeddings=True).tolist()
+
 
 def search(query: str, top_k=5):
     print(f"\n🔍 Searching for: {query}")
@@ -51,13 +49,13 @@ def search(query: str, top_k=5):
         "size": top_k,
         "query": {
             "script_score": {
-                "query": { "match_all": {} },
+                "query": {"match_all": {}},
                 "script": {
                     "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
-                    "params": { "query_vector": embedding }
-                }
+                    "params": {"query_vector": embedding},
+                },
             }
-        }
+        },
     }
 
     res = es.search(index=ES_INDEX, body=body)
@@ -65,14 +63,16 @@ def search(query: str, top_k=5):
     for i, hit in enumerate(res["hits"]["hits"]):
         score = hit["_score"]
         source = hit["_source"]
-        print(f"\n#{i+1} — Score: {score:.3f}")
+        print(f"\n#{i + 1} — Score: {score:.3f}")
         print(f"[{source['story_title']}] — {source['text']}")
 
+
 if __name__ == "__main__":
-    print("Ask the DB for chunks directly to see the raw outputs most close to your query.")
+    print(
+        "Ask the DB for chunks directly to see the raw outputs most close to your query."
+    )
     while True:
         try:
-
             query = input("\nAsk the Eldrich Oracle (or 'exit'): ").strip()
             if query.lower() in ("exit", "quit"):
                 break

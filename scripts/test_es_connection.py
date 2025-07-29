@@ -32,16 +32,16 @@ CORPUS_JSONL_FILE = os.getenv("CORPUS_JSONL_FILE")
 es = Elasticsearch(
     ES_HOST,
     basic_auth=(ES_USER, ES_PASS),
-    verify_certs=False,     # don't do this in production environments
-    ssl_context=context
+    verify_certs=False,  # don't do this in production environments
+    ssl_context=context,
 )
 
 try:
     info = es.info()
     logger.info("Connected to Elasticsearch")
-    logger.info(f"Cluster: {info['cluster_name']} | Version: {info['version']['number']}")
+    logger.info(
+        f"Cluster: {info['cluster_name']} | Version: {info['version']['number']}"
+    )
 except Exception as e:
     logger.error(f"Could not connect to Elasticsearch:\n{type(e).__name__}: {e}")
     sys.exit(1)
-
-

@@ -27,6 +27,7 @@ nlp = spacy.load(SPACY_MODEL)
 encoder = SentenceTransformer(MODEL)
 tokenizer = encoder.tokenizer
 
+
 # Utility: extract title from first line
 def extract_title(first_line: str) -> str:
     match = re.match(r'["“](.+?)["”]\s+by', first_line, re.IGNORECASE)
@@ -34,8 +35,10 @@ def extract_title(first_line: str) -> str:
         return match.group(1).strip()
     return "Unknown Title"
 
+
 def count_tokens(text: str) -> int:
     return len(tokenizer.encode(text, add_special_tokens=False))
+
 
 def chunk_and_embed_story(text: str, title: str, source_file: str) -> List[Dict]:
     doc = nlp(text)
@@ -56,7 +59,7 @@ def chunk_and_embed_story(text: str, title: str, source_file: str) -> List[Dict]
             "source": source_file,
             "start_token": start_token,
             "end_token": end_token,
-            "embedding": embedding
+            "embedding": embedding,
         }
         chunks.append(result)
         # Slide window for overlap
@@ -86,24 +89,30 @@ def chunk_and_embed_story(text: str, title: str, source_file: str) -> List[Dict]
 
     return chunks
 
+
 def main():
     input_path = Path(INPUT_FILE_DIR)
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as out_f:
-        for file_path in tqdm(list(input_path.glob("*.txt")), desc="Processing stories"):
+        for file_path in tqdm(
+            list(input_path.glob("*.txt")), desc="Processing stories"
+        ):
             with open(file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
                 if not lines:
-                    assert(f"There are no lines in the file: {file_path.name}")
+                    assert f"There are no lines in the file: {file_path.name}"
                 title_line = lines[0].strip()
                 story_text = "".join(lines[1:]).strip()
                 story_title = extract_title(title_line)
 
-                story_chunks = chunk_and_embed_story(story_text, story_title, file_path.name)
+                story_chunks = chunk_and_embed_story(
+                    story_text, story_title, file_path.name
+                )
                 for chunk in story_chunks:
                     out_f.write(json.dumps(chunk) + "\n")
 
     logger.info(f"Finished writing chunks to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main()

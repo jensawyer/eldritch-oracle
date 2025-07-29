@@ -27,10 +27,10 @@ if not JSONL_PATH or not Path(JSONL_PATH).exists():
     raise FileNotFoundError(f"CORPUS_JSONL_FILE not found: {JSONL_PATH}")
 
 # Set up Elasticsearch client
-es = Elasticsearch(ES_HOST,
-                   basic_auth=(ES_USER, ES_PASS),
-                   verify_certs=False,
-                   ssl_context=context)
+es = Elasticsearch(
+    ES_HOST, basic_auth=(ES_USER, ES_PASS), verify_certs=False, ssl_context=context
+)
+
 
 # Create index if not exists
 def create_index():
@@ -39,35 +39,36 @@ def create_index():
         return
 
     print(f"Creating index '{ES_INDEX}'...")
-    es.indices.create(index=ES_INDEX, body={
-        "mappings": {
-            "properties": {
-                "story_title": { "type": "keyword" },
-                "chunk_id":    { "type": "integer" },
-                "text":        { "type": "text" },
-                "source":      { "type": "keyword" },
-                "start_token": { "type": "integer" },
-                "end_token":   { "type": "integer" },
-                "embedding": {
-                    "type": "dense_vector",
-                    "dims": 768,
-                    "index": True,
-                    "similarity": "cosine"
+    es.indices.create(
+        index=ES_INDEX,
+        body={
+            "mappings": {
+                "properties": {
+                    "story_title": {"type": "keyword"},
+                    "chunk_id": {"type": "integer"},
+                    "text": {"type": "text"},
+                    "source": {"type": "keyword"},
+                    "start_token": {"type": "integer"},
+                    "end_token": {"type": "integer"},
+                    "embedding": {
+                        "type": "dense_vector",
+                        "dims": 768,
+                        "index": True,
+                        "similarity": "cosine",
+                    },
                 }
             }
-        }
-    })
+        },
+    )
+
 
 # Generator for bulk indexing
 def generate_docs():
     with open(JSONL_PATH, "r", encoding="utf-8") as f:
         for line in f:
             doc = json.loads(line)
-            yield {
-                "_op_type": "index",
-                "_index": ES_INDEX,
-                "_source": doc
-            }
+            yield {"_op_type": "index", "_index": ES_INDEX, "_source": doc}
+
 
 def main():
     if not es.ping():
@@ -78,6 +79,7 @@ def main():
     print(f"Indexing chunks from {JSONL_PATH} into '{ES_INDEX}'...")
     result = helpers.bulk(es, generate_docs())
     print(f"Indexed {result[0]} documents successfully.")
+
 
 if __name__ == "__main__":
     main()

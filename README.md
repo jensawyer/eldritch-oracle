@@ -1,6 +1,5 @@
-# Eldritch Oracle
+# 🐙 The Eldritch Oracle
 
-### 
 A locally deployable barebones RAG (Retrieval-Augmented Generation) system whispering insights from the void.
 
 ## Overview
@@ -22,10 +21,14 @@ Designed as a portfolio-quality project that would be pretty trivial to extend, 
 * Docker and K8s support (vLLM-optional)
 * Configurable via .env and runtime CLI
 * REST API served by FastAPI
+* A fun script to speak directly to the ElasticSearch DB so you can see what vector search really returns
 
 ## System Requirements
 
-To run this project locally, you will need to have a Kubernetes cluster running on your machine. I'm using Docker Desktop with [Kubernetes enabled](https://www.docker.com/blog/how-to-set-up-a-kubernetes-cluster-on-docker-desktop/). You also need to have [uv installed](https://docs.astral.sh/uv/getting-started/installation/#cargo). 
+To run this project locally, you will need to have 
+* A Kubernetes cluster running on your machine. I'm using Docker Desktop with [Kubernetes enabled](https://www.docker.com/blog/how-to-set-up-a-kubernetes-cluster-on-docker-desktop/).
+* [uv](https://docs.astral.sh/uv/getting-started/installation/#cargo) installed.
+* [coreutils](https://formulae.brew.sh/formula/coreutils) for timeout which I used in my Makefile.
 
 I'm running this on an M3 Macbook with 64GB of memory. This lets me run a decent sized model, but does not currently support vLLM in Docker on a Linux VM. If you're on a Linux box with a good GPU or two, there is the option of running the vLLM configuration to set up inference in your Kubernetes cluster. You should also be able to use your ChatGPT API info if you want to have a glorious context window with loads of room for returning more docs from ElasticSearch. Otherwise, I am just using [Ollama](https://ollama.com) because Apple Silicon currently does not expose GPU compute to Docker containers or Linux VMs and it was just super annoying. Personal projects should be fun too, right? 
 
@@ -42,7 +45,7 @@ This project also expects you to have [The Corpus of Cthulhu](https://github.com
 
 
 ### A Test API Call
-```aiignore
+```
 curl -X POST http://localhost:8000/api/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -52,7 +55,7 @@ curl -X POST http://localhost:8000/api/chat \
   }'
 ```
 To which you should get a reply such as:
-```aiignore
+```
 {"role":"assistant",
 "content":"The abomination known as the Shoggoth. In the dimly lit recesses of the elder gods' twisted realm, such creatures were born from the primordial ooze of madness and chaos. Sculptured images of these entities filled Danforth and me with horror and loathing. They were normally shapeless entities composed of a viscous jelly which looked like an agglutination of bubbles; and each averaged about fifteen feet in diameter when a sphere.\n\nBut beware, for the Shoggoths were not static monstrosities. They had a constantly shifting shape and volume; throwing out temporary developments or forming apparent organs of sight, hearing, and speech in imitation of their masters, either spontaneously or according to suggestion.\n\nTheir existence was marked by a peculiar war of re-subjugation waged upon them by the marine Old Ones, who employed curious weapons of molecular disturbance against the rebel entities. The Shoggoths were tamed and broken by armed Old Ones as the wild horses of the American west were tamed by cowboys.\n\nYet, even in their domesticated state, the Shoggoth's malevolent presence lurked, waiting to unleash its full fury upon an unsuspecting world. As I studied the emotions conveyed in the carvings, I prayed that none ever might behold such abominations again..."}
 ```
@@ -66,6 +69,27 @@ In an easier-to-read format:
 >
 >Yet, even in their domesticated state, the Shoggoth's malevolent presence lurked, waiting to unleash its full fury upon an unsuspecting world. As I studied the emotions conveyed in the carvings, I prayed that none ever might behold such abominations again...
 
+## Project Organization
+
+```aiignore
+.
+|-- api
+|-- core
+|-- k8s
+|   |-- elasticsearch
+|   |-- vllm
+|-- main.py
+|-- models
+|-- scripts
+|-- services
+```
+* api - contains the routes for the FastAPI interface
+* core - contains configuration and instantiations for shared components
+* k8s - deployment files for services we'll need (ElasticSearch and potentially vLLM)
+* models - data structures used in the project (namely in the API, but there could be more with extension)
+* scripts - mainly scripts used in the deployment and data processing steps during project initialization. Also try running `search_chunks.py` if you want to just talk directly to the DB!
+* services - the internal services for the agent - hamely, the search service and chat service. 
+* main.py - like the Big Lebowski's rug, it really ties the project together. :) 
 
 ## Production
 

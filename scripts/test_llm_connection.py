@@ -24,9 +24,7 @@ print(f"Python exec: {sys.executable}")
 print(f"Version: {sys.version}")
 
 try:
-    openai_client = OpenAI(
-        base_url=BASE_URL,
-        api_key=INFERENCE_API_KEY)
+    openai_client = OpenAI(base_url=BASE_URL, api_key=INFERENCE_API_KEY)
     models = openai_client.models.list()
     print(f"LLM is reachable. Found {len(models.data)} model(s).")
     model_ids = {m.id for m in models.data}

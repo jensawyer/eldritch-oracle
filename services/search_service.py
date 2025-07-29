@@ -4,23 +4,23 @@ import logging
 
 
 class ESSearch:
-
-    def __init__(self, config:Config):
+    def __init__(self, config: Config):
         self.es_client = config.es_client
         self.index: str = config.es_index
         self.embedding_model: str = config.embedding_model
         self.top_k_results: str = config.top_k_search_results
         self.logger = logging.getLogger(self.__class__.__name__)
-        self._encoder =  None
+        self._encoder = None
 
     @property
     def encoder(self):
         if self._encoder is None:
             from sentence_transformers import SentenceTransformer
+
             self._encoder = SentenceTransformer(self.embedding_model)
         return self._encoder
 
-    def embed_query(self, query:str) -> list[int]:
+    def embed_query(self, query: str) -> list[int]:
         return self.encoder.encode(query, normalize_embeddings=True).tolist()
 
     def search(self, messages: list[ChatMessage], top_k) -> list[str]:
@@ -34,7 +34,9 @@ class ESSearch:
         chunks of text as you preprocessed with the prep_docs script, and whether you are feeding context back in for future turns (we aren't for now)
         :return: The list of document strings
         """
-        latest_user_msg = next((m.content for m in reversed(messages) if m.role == "user"), "")
+        latest_user_msg = next(
+            (m.content for m in reversed(messages) if m.role == "user"), ""
+        )
         if not latest_user_msg:
             return []
         embedding = self.embed_query(latest_user_msg)
@@ -45,15 +47,15 @@ class ESSearch:
                     "query": {"match_all": {}},
                     "script": {
                         "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
-                        "params": {"query_vector": embedding}
-                    }
+                        "params": {"query_vector": embedding},
+                    },
                 }
-            }
+            },
         }
         search_result = self.es_client.search(index=self.index, body=body)
         result = []
-        for hit in search_result['hits']['hits']:
-            del hit['_source']['embedding']
-            result.append(str(hit['_source']))
+        for hit in search_result["hits"]["hits"]:
+            del hit["_source"]["embedding"]
+            result.append(str(hit["_source"]))
         self.logger.debug(result)
         return result

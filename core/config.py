@@ -8,6 +8,7 @@ import ssl
 from openai import OpenAI
 from pythonjsonlogger.json import JsonFormatter
 
+
 class Config:
     def __init__(self):
         env_path = Path(__file__).resolve().parents[1] / ".env"
@@ -31,7 +32,6 @@ class Config:
         self._openai_client = None
         self._setup_logging()
 
-
     @property
     def es_client(self):
         """
@@ -48,7 +48,7 @@ class Config:
                 self.es_host,
                 basic_auth=(self.es_user, self.es_password),
                 verify_certs=False,
-                ssl_context=ssl_context
+                ssl_context=ssl_context,
             )
         return self._es_client
 
@@ -63,11 +63,9 @@ class Config:
         if self._openai_client is None:
             base_url = self.inference_api_url.rstrip("/") + "/v1"
             self._openai_client = OpenAI(
-                base_url=base_url,
-                api_key=self.inference_api_key
+                base_url=base_url, api_key=self.inference_api_key
             )
         return self._openai_client
-
 
     def _setup_logging(self):
         logger = logging.getLogger()
@@ -77,6 +75,3 @@ class Config:
             handler.setFormatter(formatter)
             logger.setLevel(logging.DEBUG)
             logger.addHandler(handler)
-
-
-

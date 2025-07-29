@@ -29,8 +29,9 @@ CORPUS_JSONL_FILE = os.getenv("CORPUS_JSONL_FILE")
 es = Elasticsearch(
     ES_HOST,
     basic_auth=(ES_USER, ES_PASS),
-    verify_certs=False,     # don't do this in production environments
-    ssl_context=context)
+    verify_certs=False,  # don't do this in production environments
+    ssl_context=context,
+)
 
 # Check if index exists
 if not es.indices.exists(index=ES_INDEX):
@@ -41,19 +42,25 @@ logger.info(f"Index '{ES_INDEX}' exists.")
 
 # Count documents
 try:
-    with open(CORPUS_JSONL_FILE, 'r') as file:
+    with open(CORPUS_JSONL_FILE, "r") as file:
         lines = file.readlines()
         num_lines = len(lines)
         logger.info(f"The file has {num_lines} lines.")
-        count = es.count(index=ES_INDEX)['count']
+        count = es.count(index=ES_INDEX)["count"]
         if count == 0:
-            logger.error(f"Index '{ES_INDEX}' exists but contains 0 documents. You need to run the index command.")
+            logger.error(
+                f"Index '{ES_INDEX}' exists but contains 0 documents. You need to run the index command."
+            )
             sys.exit(3)
         elif count == num_lines:
-            logger.error(f"Index and jsonl file contain {count} entries. Looks like everything is indexed!")
+            logger.error(
+                f"Index and jsonl file contain {count} entries. Looks like everything is indexed!"
+            )
         else:
-            logger.error(f"Index contains {count} documents and we expected {num_lines} from the corpus jsonl file. You should "
-                  f"reindex or just know you might not get expected results.")
+            logger.error(
+                f"Index contains {count} documents and we expected {num_lines} from the corpus jsonl file. You should "
+                f"reindex or just know you might not get expected results."
+            )
             sys.exit(4)
 except Exception as e:
     logger.error(f"Error counting documents:\n{type(e).__name__}: {e}")
