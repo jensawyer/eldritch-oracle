@@ -11,10 +11,8 @@ def get_agent(request: Request):
     return agent
 
 
-@router.post("/chat")
-async def chat(
-    request: ChatRequest, agent=Depends(get_agent), response_model=ChatMessage
-):
+@router.post("/chat", response_model=ChatMessage)
+async def chat(request: ChatRequest, agent=Depends(get_agent)):
     return agent.generate_response(request)
 
 
