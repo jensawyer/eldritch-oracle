@@ -32,12 +32,18 @@ class RAGAgent:
             request.messages, top_k=1
         )
         context_text = "\n\n".join(c for c in context_chunks)
+        # This must be kept really small for our purposes on a local machine as Ollama defaults to a very small context window
+        # and we're using the default via the OpenAI client. It's easy to enlarge to what the model can handle via the real
+        # Ollama interface.
         sys_prompt = f"""You are an assistant that is an expert on H.P. Lovecraft's work.
 You will answer questions with excerpts from H.P. Lovecraft's stories which you may explain or summarize in the style of Lovecraft.
+Do not offer additional followup questions because you will have no memory of what you said before.
+Always bring the topic back to Lovecraft's stories. You do not write or talk about code. You refuse to engage in thought experiments.
 You must use the following context to help write your reply: {context_text}"""
         final_prompt = []
         final_prompt.append({"role": "system", "content": sys_prompt})
-        final_prompt.append(*[msg.model_dump() for msg in request.messages])
+        # Add the incoming conversation messages
+        final_prompt.extend([msg.model_dump() for msg in request.messages])
         self.logger.debug(final_prompt)
         response = self.openai_client.chat.completions.create(
             model=self.config.inference_model_name,

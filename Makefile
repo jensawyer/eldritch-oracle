@@ -53,10 +53,10 @@ check-env:
 
 prepare-vllm-k8s:
 	@echo "Preparing K8s manifests..."
-ifeq ($(SELF_HOST_LLM),true)
-	@envsubst < k8s/llm/llm-deployment.yaml.template > k8s/llm/llm-deployment.yaml
-	@envsubst < k8s/llm/llm-pv.yaml.template > k8s/llm/llm-pv.yaml
-endif
+	@if [ "$(SELF_HOST_LLM)" = "true" ]; then \
+		envsubst < k8s/vllm/vllm-deployment.yaml.template > k8s/vllm/vllm-deployment.yaml; \
+		envsubst < k8s/vllm/vllm-pv.yaml.template > k8s/vllm/vllm-pv.yaml; \
+	fi
 
 wait-for-ready:
 	@if [ -z "$(LABEL)" ]; then \
@@ -72,7 +72,7 @@ wait-for-es:
 	@$(MAKE) wait-for-ready LABEL=app=elasticsearch
 
 wait-for-llm:
-	@$(MAKE) wait-for-ready LABEL=app=llm-server
+	@$(MAKE) wait-for-ready LABEL=app=vllm-server
 
 check-es:
 	@echo "Checking Elasticsearch connection and index at $(ES_HOST)..."
@@ -142,7 +142,7 @@ dev-up:
 
 serve:
 	@echo "Starting FastAPI server with Uvicorn..."
-	uv run -- uvicorn main:app --port 8000 --workers 1
+	PYTHONPATH=./src uv run -- uvicorn main:app --port 8000 --workers 1
 
 dev-down:
 	@for comp in $(K8S_COMPONENTS); do \

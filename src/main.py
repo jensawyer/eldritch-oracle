@@ -36,14 +36,19 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-# CORS setup if you want to use this from a browser frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Adjust for prod
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Optional CORS: gate by explicit allowlist via env var
+# Example: CORS_ALLOW_ORIGINS=http://localhost:5173,http://localhost:3000
+allowed_origins = [
+    o.strip() for o in os.getenv("CORS_ALLOW_ORIGINS", "").split(",") if o.strip()
+]
+if allowed_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+        allow_credentials=False,
+    )
 
 app.include_router(router, prefix="/api")
 
